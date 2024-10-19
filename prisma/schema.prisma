@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role{
+  USER
+  ADMIN
+}
+
+// User model representing pet owners
+model User {
+  id        String   @id @default(uuid())
+  pets      Pet[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  clerkUserId String @unique
+  firstName String?
+  lastName  String? 
+  imageUrl  String? 
+  email     String @unique 
+  Notification Notification[]
+  Appointment Appointment[]
+}
+
+// Admin model representing the system administrator
+model Admin {
+  id        String      @id
+  username  String   @unique
+  password  String
+  email     String   @unique
+}
+
+
+// Pet model representing pets registered by users
+model Pet {
+  id            Int            @id @default(autoincrement())
+  name          String
+  type          String
+  breed         String
+  bloodType     String
+  birthday      DateTime
+  sex           String
+  img           String?
+  userId        String
+  user          User           @relation(fields: [userId], references: [id])
+  healthRecords HealthRecord[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([userId])
+  Vaccination Vaccination[]
+  Deworming Deworming[]
+  Appointment Appointment[]
+}
+
+// Vaccination model to store vaccination details for pets
+model Vaccination {
+  id            Int            @id @default(autoincrement())
+  weight       Float
+  vaccineName  String
+  medicineName String
+  manufacturer String
+  date         DateTime @default(now())
+  nextDueDate  DateTime?
+  pet          Pet      @relation(fields: [petId], references: [id])
+  petId        Int
+  veterinarian Veterinarian @relation(fields: [veterinarianId], references: [id])
+  veterinarianId Int
+}
+model Veterinarian {
+  id            Int            @id @default(autoincrement())
+  name         String
+  specialization String
+  phone        String
+  email        String
+  prclicNo     String
+  prtNo       String
+  tinNo       String
+  Vaccination Vaccination[]
+
+  Deworming Deworming[]
+}
+
+model Deworming {
+  id            Int            @id @default(autoincrement())
+  weight       Float
+  dewormingName String
+  medicineName String
+  manufacturer String
+  date         DateTime @default(now())
+  nextDueDate  DateTime?
+  pet          Pet      @relation(fields: [petId], references: [id])
+  petId        Int
+  veterinarian Veterinarian @relation(fields: [veterinarianId], references: [id])
+  veterinarianId Int
+}
+model ClinicInfo {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String
+  phone       String
+  email       String
+  openingHours String
+  emergencyContact String?
+}
+model Service {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  description String
+  duration   Int
+  price      Float
+  appointments Appointment[]
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  sentAt    DateTime @default(now())
+  readAt    DateTime?
+}
+
+
+// Appointment model for scheduling appointments with pets
+model Appointment {
+  id            Int            @id @default(autoincrement())
+  pet           Pet            @relation(fields: [petId], references: [id])
+  petId         Int
+  user          User           @relation(fields: [userId], references: [id])
+  userId        String
+  service       Service        @relation(fields: [serviceId], references: [id])
+  serviceId     Int
+  date          DateTime
+  status        String
+  notes         String?
+  Prescription  Prescription[] // Prescriptions associated with the appointment
+}
+
+
+
+// HealthRecord model to track medical history of pets
+model HealthRecord {
+  id           Int      @id @default(autoincrement())
+  petId        Int
+  pet          Pet      @relation(fields: [petId], references: [id])
+  date         DateTime
+  weight       Float
+  temperature  Float
+  diagnosis    String
+  treatment    String
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([petId])
+}
+
+// Prescription model for medications prescribed during appointments
+model Prescription {
+  id            Int         @id @default(autoincrement())
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  appointmentId Int
+  medication    String
+  dosage        String
+  instructions  String?
+}
+
+// Inventory model for tracking medications and supplies in the clinic
+model Inventory {
+  id             Int      @id @default(autoincrement())
+  itemName       String
+  quantity       Int
+  expirationDate DateTime
+  reorderLevel   Int      // Minimum quantity before reordering is necessary
+}
+
+
+

@@ -1,6 +1,113 @@
+
+//
+
 // TEMPORARY DATA
 
-export let role = "admin";
+// export let role = "user";
+
+// PETS DATA
+export const petsData = [
+  {
+    id: 1,
+    name: "Buddy",
+    age: "2 years",
+    gender: "Male",
+    breed: "Golden Retriever",
+    bloodType: "DEA 1.1 Positive",
+    imageUrl: "https://images.pexels.com/photos/4587985/pexels-photo-4587985.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["John Doe"],
+  },
+  {
+    id: 2,
+    name: "Milo",
+    age: "1 year",
+    gender: "Male",
+    breed: "Poodle",
+    bloodType: "DEA 1.1 Negative",
+    imageUrl: "https://images.pexels.com/photos/4587996/pexels-photo-4587996.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Jane Doe"],
+  },
+  {
+    id: 3,
+    name: "Luna",
+    age: "3 years",
+    gender: "Female",
+    breed: "Beagle",
+    bloodType: "DEA 1.2 Positive",
+    imageUrl: "https://images.pexels.com/photos/4588010/pexels-photo-4588010.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Mike Geller"],
+  },
+  {
+    id: 4,
+    name: "Bella",
+    age: "4 years",
+    gender: "Female",
+    breed: "Bulldog",
+    bloodType: "DEA 1.2 Negative",
+    imageUrl: "https://images.pexels.com/photos/4587992/pexels-photo-4587992.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Jay French"],
+  },
+  {
+    id: 5,
+    name: "Max",
+    age: "3 years",
+    gender: "Male",
+    breed: "German Shepherd",
+    bloodType: "DEA 1.1 Positive",
+    imageUrl: "https://images.pexels.com/photos/4587990/pexels-photo-4587990.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Jane Smith"],
+  },
+  {
+    id: 6,
+    name: "Coco",
+    age: "2 years",
+    gender: "Female",
+    breed: "Shih Tzu",
+    bloodType: "DEA 1.1 Negative",
+    imageUrl: "https://images.pexels.com/photos/4587988/pexels-photo-4587988.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Anna Santiago"],
+  },
+  {
+    id: 7,
+    name: "Charlie",
+    age: "1.5 years",
+    gender: "Male",
+    breed: "Labrador Retriever",
+    bloodType: "DEA 1.2 Positive",
+    imageUrl: "https://images.pexels.com/photos/4587987/pexels-photo-4587987.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Allen Black"],
+  },
+  {
+    id: 8,
+    name: "Daisy",
+    age: "4 years",
+    gender: "Female",
+    breed: "Cocker Spaniel",
+    bloodType: "DEA 1.2 Negative",
+    imageUrl: "https://images.pexels.com/photos/4587997/pexels-photo-4587997.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Ophelia Castro"],
+  },
+  {
+    id: 9,
+    name: "Rocky",
+    age: "3.5 years",
+    gender: "Male",
+    breed: "Boxer",
+    bloodType: "DEA 1.1 Positive",
+    imageUrl: "https://images.pexels.com/photos/4587986/pexels-photo-4587986.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["Derek Briggs"],
+  },
+  {
+    id: 10,
+    name: "Lily",
+    age: "5 years",
+    gender: "Female",
+    breed: "Pug",
+    bloodType: "DEA 1.1 Negative",
+    imageUrl: "https://images.pexels.com/photos/4587984/pexels-photo-4587984.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    owner:["John Glover"],
+  },
+];
 
 export const teachersData = [
   {
@@ -11,6 +118,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/2888150/pexels-photo-2888150.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets: ["Buddy"],
     subjects: ["Math", "Geometry"],
     classes: ["1B", "2A", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -23,6 +131,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/936126/pexels-photo-936126.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets: ["Milo"],
     subjects: ["Physics", "Chemistry"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -35,6 +144,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/428328/pexels-photo-428328.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets: ["Luna"],
     subjects: ["Biology"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -47,6 +157,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/1187765/pexels-photo-1187765.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Bella"],
     subjects: ["History"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -59,6 +170,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/1102341/pexels-photo-1102341.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Max"],
     subjects: ["Music", "History"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -71,6 +183,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/712513/pexels-photo-712513.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Coco"],
     subjects: ["Physics"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -83,6 +196,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Charlie"],
     subjects: ["English", "Spanish"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -95,6 +209,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Daisy"],
     subjects: ["Math", "Geometry"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -107,6 +222,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/842980/pexels-photo-842980.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Rocky"],
     subjects: ["Literature", "English"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",
@@ -119,6 +235,7 @@ export const teachersData = [
     photo:
       "https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg?auto=compress&cs=tinysrgb&w=1200",
     phone: "1234567890",
+    pets:["Lily"],
     subjects: ["Biology"],
     classes: ["5A", "4B", "3C"],
     address: "123 Main St, Anytown, USA",

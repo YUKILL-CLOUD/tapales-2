@@ -1,94 +1,82 @@
-import { role } from "@/lib/data";
-import Image from "next/image";
+import { currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { Icon } from '@iconify/react';
 
 const menuItems = [
   {
     title: "MENU",
     items: [
       {
-        icon: "/home.png",
+        icon: "mdi:home",
         label: "Home",
-        href: "/",
-        visible: ["admin", "teacher", "student", "parent"],
+        href: "/list/home",
+        visible: ["user",]
       },
       {
-        icon: "/teacher.png",
-        label: "Teachers",
-        href: "/list/teachers",
-        visible: ["admin", "teacher"],
+        icon: "mdi:cog-outline",
+        label: "Services",
+        href: "/list/services",
+        visible: ["user", "admin"]
       },
       {
-        icon: "/student.png",
-        label: "Students",
-        href: "/list/students",
-        visible: ["admin", "teacher"],
+        icon: "mdi:contacts",
+        label: "Contacts",
+        href: "/list/contacts",
+        visible: ["user"]
       },
       {
-        icon: "/parent.png",
-        label: "Parents",
-        href: "/list/parents",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/subject.png",
-        label: "Subjects",
-        href: "/list/subjects",
+        icon: "mdi:account",
+        label: "User",
+        href: "/list/users",
         visible: ["admin"],
       },
       {
-        icon: "/class.png",
-        label: "Classes",
-        href: "/list/classes",
-        visible: ["admin", "teacher"],
+        icon: "mdi:paw",
+        label: "Pets",
+        href: "/list/pets",
+        visible: ["admin", "user"],
       },
       {
-        icon: "/lesson.png",
-        label: "Lessons",
-        href: "/list/lessons",
-        visible: ["admin", "teacher"],
-      },
-      {
-        icon: "/exam.png",
-        label: "Exams",
-        href: "/list/exams",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/assignment.png",
-        label: "Assignments",
-        href: "/list/assignments",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/result.png",
-        label: "Results",
-        href: "/list/results",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/attendance.png",
-        label: "Attendance",
-        href: "/list/attendance",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/calendar.png",
-        label: "Events",
-        href: "/list/events",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/message.png",
-        label: "Messages",
-        href: "/list/messages",
-        visible: ["admin", "teacher", "student", "parent"],
-      },
-      {
-        icon: "/announcement.png",
+        icon: "mdi:bullhorn",
         label: "Announcements",
         href: "/list/announcements",
-        visible: ["admin", "teacher", "student", "parent"],
+        visible: ["admin", "user"],
+      },
+      {
+        icon: "mdi:calendar-clock",
+        label: "Appointment",
+        href: "/list/appointment",
+        visible: ["admin", "user"],
+      },
+      {
+        icon: "mdi:book-open-page-variant",
+        label: "Booking",
+        href: "/list/booking",
+        visible: ["user"],
+      },
+      {
+        icon: "mdi:medical-bag",
+        label: "Health Record",
+        href: "/list/healthRecord",
+        visible: ["admin"],
+      },
+      {
+        icon: "mdi:syringe",
+        label: "Vaccinations",
+        href: "/list/vaccination",
+        visible: ["admin"],
+      },
+      {
+        icon: "mdi:medication",
+        label: "Dewormings",
+        href: "/list/deworming",
+        visible: ["admin"],
+      },
+      {
+        icon: "mdi:doctor",
+        label: "Veterinarian",
+        href: "/list/veterinarians",
+        visible: ["admin"],
       },
     ],
   },
@@ -96,19 +84,19 @@ const menuItems = [
     title: "OTHER",
     items: [
       {
-        icon: "/profile.png",
+        icon: "mdi:account-circle",
         label: "Profile",
         href: "/profile",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
-        icon: "/setting.png",
+        icon: "mdi:cog",
         label: "Settings",
         href: "/settings",
         visible: ["admin", "teacher", "student", "parent"],
       },
       {
-        icon: "/logout.png",
+        icon: "mdi:logout",
         label: "Logout",
         href: "/logout",
         visible: ["admin", "teacher", "student", "parent"],
@@ -117,7 +105,9 @@ const menuItems = [
   },
 ];
 
-const Menu = () => {
+const Menu = async () => {
+  const user = await currentUser()
+  const role = user?.publicMetadata.role as string 
   return (
     <div className="mt-4 text-sm">
       {menuItems.map((i) => (
@@ -133,7 +123,7 @@ const Menu = () => {
                   key={item.label}
                   className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-lamaSkyLight"
                 >
-                  <Image src={item.icon} alt="" width={20} height={20} />
+                  <Icon icon={item.icon} width="20" height="20" />
                   <span className="hidden lg:block">{item.label}</span>
                 </Link>
               );
