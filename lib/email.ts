@@ -98,7 +98,7 @@ export async function sendAppointmentEmail(
 
   try {
     const result = await resend.emails.send({
-      from: process.env.NEXT_PUBLIC_EMAIL_FROM || 'onboarding@resend.dev',
+      from: process.env.NEXT_PUBLIC_EMAIL_FROM || 'noreply@tapalesvet.site',
       to,
       subject: template.subject,
       html: template.html,
