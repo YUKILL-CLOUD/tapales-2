@@ -255,7 +255,7 @@ export default function SignInPage() {
               </SignIn.Action>
             </div>
 
-            <div className="relative my-6">
+            {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
@@ -280,7 +280,7 @@ export default function SignInPage() {
                 <Clerk.Icon />
                 Sign in with Facebook
               </Clerk.Connection>
-            </div>
+            </div> */}
 
             <p className="text-center text-sm text-gray-500 mt-6">
               Don&apos;t have an account?{' '}
