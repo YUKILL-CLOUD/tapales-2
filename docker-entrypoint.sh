@@ -3,6 +3,9 @@
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to be ready..."
 sleep 5
+# Generate Prisma client
+echo "Generating Prisma client..."
+npx prisma generate
 
 # Run migrations
 echo "Running migrations..."
