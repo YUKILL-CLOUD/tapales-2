@@ -1,203 +1,230 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { HeartIcon, PhoneIcon, MailIcon } from "lucide-react"
+import React, { useState } from "react"
+import { useUser } from "@clerk/nextjs"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { toast } from 'react-toastify'
+import { Button } from "./ui/button"
+import { Input } from "./ui/input"
+import { Form, FormField, FormItem, FormLabel, FormControl } from "./ui/form"
+import { CldUploadWidget } from 'next-cloudinary';
+import Image from "next/image"
+import { createRehomingPet } from "@/lib/action"
+import { RehomingPet } from "@prisma/client"
+import { FormProvider } from "react-hook-form"
 
-// Card component
-const Card = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <div className={`bg-mainColor rounded-lg shadow-lg ${className}`}>{children}</div>
-)
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  age: z.string().min(1, "Age is required"),
+  gender: z.string().min(1, "Gender is required"),
+  breed: z.string().min(1, "Breed is required"),
+  type: z.string().min(1, "Type is required"),
+  imageUrl: z.string().url().optional().nullable(),
+  sellerName: z.string().min(1, "Seller name is required"),
+  sellerPhone: z.string().min(1, "Seller phone is required"),
+  sellerEmail: z.string().email("Invalid email address"),
+})
 
-const CardContent = ({ className, children }: { className?: string; children: React.ReactNode }) => (
-  <div className={className}>{children}</div>
-)
+export default function PetRehoming({ initialPets }: { initialPets: RehomingPet[] }) {
+  const [pets, setPets] = useState<RehomingPet[]>(initialPets)
+  const [searchType, setSearchType] = useState("")
+  const { isLoaded, isSignedIn, user } = useUser()
+  const isAdmin = user?.publicMetadata?.role === "admin"
 
-// Button component
-const Button = ({ className, onClick, disabled, children }: { className?: string; onClick?: () => void; disabled?: boolean; children: React.ReactNode }) => (
-  <button
-    className={`px-4 py-2 rounded-full font-semibold transition-all duration-300 ${className}`}
-    onClick={onClick}
-    disabled={disabled}
-  >
-    {children}
-  </button>
-)
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      age: "",
+      gender: "",
+      type: "",
+      breed: "",
+      imageUrl: "",
+      sellerName: "",
+      sellerPhone: "",
+      sellerEmail: "",
+    },
+  })
 
-// Avatar component
-const Avatar = ({ src, alt, fallback, className }: { src: string; alt: string; fallback: string; className?: string }) => (
-  <div className={`relative inline-block ${className}`}>
-    <img src={src} alt={alt} className="rounded-full w-full h-full object-cover" />
-    {!src && (
-      <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-full text-gray-600 font-semibold">
-        {fallback}
-      </div>
-    )}
-  </div>
-)
+  const [img, setImg] = useState<string | null>(null);
+  const [resource, setResource] = useState();
 
-interface Pet {
-  id: number
-  name: string
-  age: string
-  gender: string
-  breed: string
-  imageUrl: string
-  seller: {
-    name: string
-    phone: string
-    email: string
-  }
-}
-
-const pets: Pet[] = [
-  {
-    id: 1,
-    name: "Buddy",
-    age: "2 years",
-    gender: "Male",
-    breed: "Golden Retriever",
-    imageUrl: "/pngegg.png",
-    seller: {
-      name: "John Doe",
-      phone: "+1 (555) 123-4567",
-      email: "john@example.com"
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!isAdmin) {
+      toast.error("Only administrators can add pets for rehoming.")
+      return
     }
-  },
-  {
-    id: 2,
-    name: "Luna",
-    age: "1 year",
-    gender: "Female",
-    breed: "Siamese Cat",
-    imageUrl: "/pngegg.png",
-    seller: {
-      name: "Jane Smith",
-      phone: "+1 (555) 987-6543",
-      email: "jane@example.com"
-    }
-  },
-  {
-    id: 3,
-    name: "Max",
-    age: "3 years",
-    gender: "Male",
-    breed: "German Shepherd",
-    imageUrl: "/pngegg.png",
-    seller: {
-      name: "Alice Johnson",
-      phone: "+1 (555) 246-8135",
-      email: "alice@example.com"
+
+    try {
+      const petData = {
+        ...values,
+        imageUrl: values.imageUrl || '' // Provide a default empty string if imageUrl is null or undefined
+      }
+      const result = await createRehomingPet({ success: false, error: null }, petData)
+      if (result.success) {
+        toast.success("Pet added for rehoming successfully!")
+        setPets([...pets, result.data])
+        form.reset()
+      } else {
+        toast.error(result.error || "Failed to add pet for rehoming. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error creating rehoming pet:", error)
+      toast.error("An unexpected error occurred. Please try again.")
     }
   }
-]
 
-export default function Component() {
-  const [currentPetIndex, setCurrentPetIndex] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const [sliding, setSliding] = useState(false)
-
-  useEffect(() => {
-    if (sliding) {
-      const timer = setTimeout(() => {
-        setSliding(false)
-      }, 300)
-      return () => clearTimeout(timer)
-    }
-  }, [sliding])
-
-  const nextPet = () => {
-    setDirection(1)
-    setSliding(true)
-    setCurrentPetIndex((prevIndex) => (prevIndex + 1) % pets.length)
-  }
-
-  const previousPet = () => {
-    setDirection(-1)
-    setSliding(true)
-    setCurrentPetIndex((prevIndex) => (prevIndex - 1 + pets.length) % pets.length)
-  }
-
-  const currentPet = pets[currentPetIndex]
+  const filteredPets = pets.filter(pet =>
+    pet.type.toLowerCase().includes(searchType.toLowerCase())
+  )
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-l from-[rgba(94,84,142,0.2)] to-[rgba(94,84,142,0.8)] p-4">
-       <h1 className="text-3xl pb-5 font-bold text-white mb-4 relative">
-          <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-200 rounded-lg blur-md opacity-50"></span>
-          REHOMING
-        </h1>
-      <Card className="w-full max-w-xs mx-auto overflow-hidden shadow-4xl transition-transform duration-300 hover:scale-105">
-        <CardContent className="p-0 relative">
-          <div
-            className={`transition-transform duration-300 ease-in-out ${
-              sliding ? (direction > 0 ? "-translate-x-full" : "translate-x-full") : "translate-x-0"
-            }`}
-          >
-            <div className="relative">
-              <img
-                src={currentPet.imageUrl}
-                alt={currentPet.name}
-                className="w-full h-[200px] object-cover"
-              />
-              <Button
-                className="absolute top-2 right-2 rounded-full bg-white/80 hover:bg-white hover:text-[rgba(94,84,142,1)] transition-all px-2 py-1 duration-300 p-2"
-              >
-                <HeartIcon className="h-4 w-4" />
-                <span className="sr-only">Add to favorites</span>
-              </Button>
-            </div>
-            <div className="p-6 bg-gradient-to-br from-[rgba(94,84,142,0.1))] to-[rgba(94,84,142,0.9)] text-white">
-              <h2 className="text-xl font-bold mb-1">{currentPet.name}</h2>
-              <p className="text-gray-200 mb-4">
-                {currentPet.breed} &bull; {currentPet.age} &bull; {currentPet.gender}
-              </p>
-              <div className="flex items-center mb-4">
-                <Avatar
-                  src="/profile.png"
-                  alt={currentPet.seller.name}
-                  fallback={currentPet.seller.name.charAt(0)}
-                  className="h-8 w-8 mr-2 border-2 border-white"
-                />
-                <div>
-                  <p className="font-semibold text-lg">{currentPet.seller.name}</p>
-                  <p className="text-sm text-gray-300">Seller</p>
-                </div>
-              </div>
-              <div className="flex flex-col space-y-1">
-                <Button className="w-full flex items-center justify-start hover:bg-white/20 transition-colors duration-300 bg-white/10">
-                  <PhoneIcon className="h-4 w-4 mr-2" />
-                  <span>{currentPet.seller.phone}</span>
-                </Button>
-                <Button className="w-full flex items-center justify-start hover:bg-white/20 transition-colors duration-300 bg-white/10">
-                  <MailIcon className="h-4 w-4 mr-2" />
-                  <span>{currentPet.seller.email}</span>
-                </Button>
-              </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Pets for Rehoming</h1>
+      <Input
+        type="text"
+        placeholder="Search by pet type..."
+        value={searchType}
+        onChange={(e) => setSearchType(e.target.value)}
+        className="mb-4"
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredPets.map((pet) => (
+          <div key={pet.id} className="bg-white rounded-lg shadow-md p-6">
+            <Image src={pet.imageUrl} alt={pet.name} width={300} height={200} className="w-full h-48 object-cover rounded-md mb-4" />
+            <h2 className="text-xl font-bold mb-2">{pet.name}</h2>
+            <p className="text-gray-600 mb-2">{pet.breed} • {pet.age} • {pet.gender}</p>
+            <p className="text-gray-600 mb-4">{pet.type}</p>
+            <div className="border-t pt-4">
+              <p className="font-semibold">Seller: {pet.sellerName}</p>
+              <p>{pet.sellerPhone}</p>
+              <p>{pet.sellerEmail}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      <div className="flex justify-center mt-3 space-x-3">
-        <Button
-          onClick={previousPet}
-          className="rounded-full bg-white text-[rgba(94,84,142,1)] hover:bg-[rgba(94,84,142,1)] hover:text-white transition-all duration-300 transform hover:scale-110"
-          disabled={sliding}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          <span className="sr-only">Previous pet</span>
-        </Button>
-        <Button
-          onClick={nextPet}
-          className="rounded-full bg-white text-[rgba(94,84,142,1)] hover:bg-[rgba(94,84,142,1)] hover:text-white transition-all duration-300 transform hover:scale-110"
-          disabled={sliding}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-          <span className="sr-only">Next pet</span>
-        </Button>
+        ))}
       </div>
+      {isAdmin && (
+         <FormProvider {...form}>
+         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-4">
+           <h2 className="text-xl font-bold">Add New Pet for Rehoming</h2>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Pet Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="age"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Age</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Gender</FormLabel>
+                <FormControl>
+                  <select {...field} className="w-full p-2 border rounded">
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="breed"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Breed</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sellerName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seller Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sellerPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seller Phone</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="sellerEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Seller Email</FormLabel>
+                <FormControl>
+                  <Input {...field} type="email" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <CldUploadWidget uploadPreset="tapales" onSuccess={(result: any) => {
+          setImg(result.info.secure_url);
+        }}>
+          {({ open }) => (
+            <button
+              className="text-lg text-gray-800 flex items-center gap-2 cursor-pointer"
+              onClick={() => open()}
+            >
+              Upload a photo
+            </button>
+          )}
+        </CldUploadWidget>
+          <Button type="submit">Submit</Button>
+        </form>
+        </FormProvider>
+      )}
     </div>
   )
 }

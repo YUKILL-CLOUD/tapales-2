@@ -22,11 +22,9 @@ export default function HeroSection() {
                 </h1>
                 <p className=" text-gray-700 dark:text-gray-300 lg:text-lg max-w-2xl lg:max-w-none mx-auto">
                 Effortlessly manageyour Pet's appointments, health records, and more with our 
-                intuitive clinic management system. Stay organized, stay informed, and give 
+                intuitive clinic management system. Stay organized, and give 
                 your pet the care they deserve.
                 </p>
-        
-      
             </div>
                 <div className="hidden md:flex flex-1 lg:w-1/2 relative max-w-3xl mx-auto lg:max-w-none">
                     <div className="lg:absolute lg:right-0 md:w-5/6 md:h-auto md:w-auto  lg:w-full lg:h-full bg-blue-100 overflow-hidden rounded-[24px]">

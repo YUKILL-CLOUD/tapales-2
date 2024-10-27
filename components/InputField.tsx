@@ -1,40 +1,31 @@
-import { FieldError } from "react-hook-form";
+import React from 'react';
+import { FieldError, UseFormRegister } from 'react-hook-form';
 
-type InputFieldProps = {
+interface InputFieldProps {
   label: string;
-  type?: string;
-  register: any;
   name: string;
-  defaultValue?: string;
+  register: UseFormRegister<any>;
   error?: FieldError;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  type?: string;
+  defaultValue?: string;
   step?: string;
-};
+}
 
-const InputField = ({
-  label,
-  type = "text",
-  register,
-  name,
-  defaultValue,
-  error,
-  inputProps,
-  step,
-}: InputFieldProps) => {
+const InputField: React.FC<InputFieldProps> = ({ label, name, register, error, type, step = '1', defaultValue }) => {
   return (
-    <div className="flex flex-col gap-2 w-full md:w-1/4">
-      <label className="text-xs text-gray-500">{label}</label>
+    <div>
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
       <input
         type={type}
-        {...register(name)}
-        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-        {...inputProps}
-        defaultValue={defaultValue}
+        id={name}
         step={step}
+        {...register(name)}
+        defaultValue={defaultValue}
+        className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
       />
-      {error?.message && (
-        <p className="text-xs text-red-400">{error.message.toString()}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-600">{error.message}</p>}
     </div>
   );
 };

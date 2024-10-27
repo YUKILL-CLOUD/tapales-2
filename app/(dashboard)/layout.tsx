@@ -1,6 +1,7 @@
+
 import Menu from "@/components/Menu";
 import Navbar from "@/components/Navbar";
-import Image from "next/image";
+import { Icon } from "@iconify/react/dist/iconify.js";
 import Link from "next/link";
 
 export default function DashboardLayout({
@@ -16,8 +17,13 @@ export default function DashboardLayout({
           href="/"
           className="flex items-center justify-center lg:justify-start gap-2"
         >
-          <Image src="/logo.png" alt="logo" width={32} height={32} />
-          <span className="hidden lg:block font-bold">Tapales</span>
+        <Icon 
+            icon="fa6-solid:dog" 
+            width={32} 
+            height={32}
+            className="text-primary"
+          />
+          <span className="hidden lg:block font-bold ">Tapales</span>
         </Link>
         <Menu />
       </div>

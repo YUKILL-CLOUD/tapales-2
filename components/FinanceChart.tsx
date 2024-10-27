@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import prisma from "@/lib/prisma";
 import {
   LineChart,
   Line,
@@ -12,75 +12,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const data = [
-  {
-    name: "Jan",
-    income: 4000,
-    expense: 2400,
-  },
-  {
-    name: "Feb",
-    income: 3000,
-    expense: 1398,
-  },
-  {
-    name: "Mar",
-    income: 2000,
-    expense: 9800,
-  },
-  {
-    name: "Apr",
-    income: 2780,
-    expense: 3908,
-  },
-  {
-    name: "May",
-    income: 1890,
-    expense: 4800,
-  },
-  {
-    name: "Jun",
-    income: 2390,
-    expense: 3800,
-  },
-  {
-    name: "Jul",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Aug",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Sep",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Oct",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Nov",
-    income: 3490,
-    expense: 4300,
-  },
-  {
-    name: "Dec",
-    income: 3490,
-    expense: 4300,
-  },
-];
+interface AppointmentChartProps {
+  data: {
+    date: string;
+    pending: number;
+    scheduled: number;
+    completed: number;
+    missed: number;
+  }[];
+}
 
-const FinanceChart = () => {
+const AppointmentChart = ({ data }: AppointmentChartProps) => {
   return (
-    <div className="bg-white rounded-xl w-full h-full p-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-lg font-semibold">Finance</h1>
-        <Image src="/moreDark.png" alt="" width={20} height={20} />
+    <div className="bg-white rounded-xl w-full h-full p-4 shadow-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-lg font-semibold">Appointment Statistics</h1>
       </div>
       <ResponsiveContainer width="100%" height="90%">
         <LineChart
@@ -96,13 +42,18 @@ const FinanceChart = () => {
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#ddd" />
           <XAxis
-            dataKey="name"
+            dataKey="date"
             axisLine={false}
             tick={{ fill: "#d1d5db" }}
             tickLine={false}
             tickMargin={10}
           />
-          <YAxis axisLine={false} tick={{ fill: "#d1d5db" }} tickLine={false}  tickMargin={20}/>
+          <YAxis 
+            axisLine={false} 
+            tick={{ fill: "#d1d5db" }} 
+            tickLine={false}  
+            tickMargin={20}
+          />
           <Tooltip />
           <Legend
             align="center"
@@ -111,15 +62,36 @@ const FinanceChart = () => {
           />
           <Line
             type="monotone"
-            dataKey="income"
-            stroke="#C3EBFA"
-            strokeWidth={5}
+            dataKey="pending"
+            stroke="#FFA500"
+            strokeWidth={2}
+            name="Pending"
           />
-          <Line type="monotone" dataKey="expense" stroke="#CFCEFF" strokeWidth={5}/>
+          <Line
+            type="monotone"
+            dataKey="scheduled"
+            stroke="#4F46E5"
+            strokeWidth={2}
+            name="Scheduled"
+          />
+          <Line
+            type="monotone"
+            dataKey="completed"
+            stroke="#22C55E"
+            strokeWidth={2}
+            name="Completed"
+          />
+          <Line
+            type="monotone"
+            dataKey="missed"
+            stroke="#EF4444"
+            strokeWidth={2}
+            name="Missed"
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>
   );
 };
 
-export default FinanceChart;
+export default AppointmentChart;

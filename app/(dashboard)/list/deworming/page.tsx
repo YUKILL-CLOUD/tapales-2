@@ -1,22 +1,9 @@
 import { Suspense } from 'react';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { role } from '@/lib/utils';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { DewormingForm } from '@/components/forms/DewormingForm';
 
 export default async function DewormingPage() {
-    const { userId } = auth();
-    
-    if (!userId) {
-        return redirect('/sign-in');
-    }
-
-    if (role !== 'admin') {
-        return <div>Access denied. Admin privileges required.</div>
-    }
-
     // Fetch all pets for admin
     const pets = await prisma.pet.findMany({
         select: {
@@ -64,7 +51,7 @@ export default async function DewormingPage() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-6">Pet Vaccination Management</h1>
+            <h1 className="text-3xl font-bold mb-6">Pet Deworming Management</h1>
             <Suspense fallback={<div>Loading form...</div>}>
                 <DewormingForm 
                     pets={pets} 

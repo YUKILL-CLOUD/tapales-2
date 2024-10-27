@@ -1,68 +1,48 @@
-'use client'
-import Announcements from "@/components/Announcements";
-import BigCalendar from "@/components/BigCalendar";
-import { updateUserRole } from "@/lib/userUtils";
-import { useUser } from "@clerk/nextjs";
-import { clerkClient } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from 'react-toastify'; // Assuming you're using react-toastify for notifications
+'use server'
+import { auth } from '@clerk/nextjs/server';
+import { getUserById } from "@/lib/users";
+import UserPageClient from './UserPageClient';
+import { redirect } from 'next/navigation';
+import { fetchUserAppointments, getAnnouncements, fetchActivities } from '@/lib/action';
+import { PrismaClient } from '@prisma/client';
+// Implied import for getAnnouncements
 
-export default function UserPage() {
-  // const { user, isLoaded } = useUser();
-  // const [loading, setLoading] = useState(true); // State to manage loading
-  // const [error, setError] = useState(""); // State to manage errors
+const prisma = new PrismaClient();
 
-  // // Check if user is loaded
-  // useEffect(() => {
-  //   if (!isLoaded) return; // Wait until user data is loaded
+export default async function UserPage() {
+  const { userId } = auth();
+  if (!userId) return redirect('/sign-in');
 
-  //   // Redirect to sign-in if not authenticated
-  //   if (!user) {
-  //     redirect('/sign-in');
-  //     return;
-  //   }
+  const { user, error } = await getUserById({ clerkUserId: userId });
 
-  //   // Call the server action to update user role
-  //   const updateRole = async () => {
-  //     try {
-  //       const result = await updateUserRole(); // Pass the user ID to the update function
+  if (error) {
+    console.error("Failed to fetch user data:", error);
+    return <div>Error loading user data</div>;
+  }
 
-  //       if (!result || !result.success) {
-  //         console.error(result?.error); // Log error if role assignment fails
-  //         setError(result?.error || 'Error updating user role'); // Set error message
-  //         toast.error(result?.error || 'Error updating user role'); // Show error notification
-  //       } else {
-  //         toast.success('User role updated successfully!'); // Show success notification
-  //       }
-  //     } catch (error) {
-  //       console.error('Error during role update:', error);
-  //       setError('An unexpected error occurred during role update');
-  //       toast.error('An unexpected error occurred during role update'); // Show error notification
-  //     } finally {
-  //       setLoading(false); // Set loading to false after role assignment
-  //     }
-  //   };
+  if (!user) {
+    return <div>User not found</div>;
+  }
 
-  //   updateRole(); // Call the async function to update the role
-  // }, [isLoaded, user]); // Dependency array includes isLoaded and user
+  const upcomingAppointments = await fetchUserAppointments(user.id);
 
-  // if (loading) return <div>Loading...</div>; // Show loading state while checking
+  const userPets = await prisma.pet.findMany({
+    where: { userId: user.id },
+    take: 5, // Limit to 5 pets for the summary
+  });
+
+  const announcements = await getAnnouncements(3); // Get latest 3 announcements
+  console.log('Fetched announcements:', announcements); // Debug log
+  
+  const activities = await fetchActivities(user.id);
 
   return (
-    <div className="flex-1 p-4 flex gap-4 flex-col xl:flex-row">
-      {/* LEFT */}
-      <div className="w-full xl:w-2/3">
-        <div className="h-full bg-white p-4 rounded-md">
-          <h1 className="text-xl font-semibold">Schedule</h1>
-          <BigCalendar />
-        </div>
-      </div>
-      {/* RIGHT */}
-      <div className="w-full xl:w-1/3 flex flex-col gap-8">
-        <Announcements />
-      </div>
-    </div>
+    <UserPageClient 
+      initialUser={user}
+      upcomingAppointments={upcomingAppointments}
+      userPets={userPets}
+      announcements={announcements}
+      activities={activities}
+    />
   );
-};
-
+}

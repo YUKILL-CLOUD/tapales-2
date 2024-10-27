@@ -1,6 +1,7 @@
 'use server'
 // app/actions/updateUserRole.ts
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
+import prisma from './prisma';
 
 export async function updateUserRole() {
   const user = await currentUser();
@@ -9,6 +10,11 @@ export async function updateUserRole() {
     return { success: false, error: 'You need to sign in first.' };
   }
 
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkUserId: user.id },
+    select: { role: true },
+  });
+  
   const currentRole = user.publicMetadata?.role;
 
   if (currentRole) {

@@ -8,8 +8,8 @@ datasource db {
 }
 
 enum Role{
-  USER
-  ADMIN
+  user
+  admin
 }
 
 // User model representing pet owners
@@ -19,12 +19,14 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   clerkUserId String @unique
+  role      Role     @default(user)
   firstName String?
   lastName  String? 
   imageUrl  String? 
   email     String @unique 
   Notification Notification[]
   Appointment Appointment[]
+  prescriptions Prescription[]
 }
 
 // Admin model representing the system administrator
@@ -56,6 +58,7 @@ model Pet {
   Vaccination Vaccination[]
   Deworming Deworming[]
   Appointment Appointment[]
+  Prescription Prescription[]
 }
 
 // Vaccination model to store vaccination details for pets
@@ -84,6 +87,8 @@ model Veterinarian {
   Vaccination Vaccination[]
 
   Deworming Deworming[]
+
+  Prescription Prescription[]
 }
 
 model Deworming {
@@ -122,8 +127,12 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   message   String
+  type      String   // e.g., 'appointment_cancelled', 'appointment_updated'
   sentAt    DateTime @default(now())
   readAt    DateTime?
+  isRead    Boolean  @default(false)
+
+  @@index([userId])
 }
 
 
@@ -136,10 +145,16 @@ model Appointment {
   userId        String
   service       Service        @relation(fields: [serviceId], references: [id])
   serviceId     Int
-  date          DateTime
-  status        String
+  date          DateTime @db.Date
+  time          DateTime @db.Time
+  status        String         @default("pending")
   notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   Prescription  Prescription[] // Prescriptions associated with the appointment
+  @@index([userId])
+  @@index([petId])
+  @@index([serviceId])
 }
 
 
@@ -164,11 +179,23 @@ model HealthRecord {
 // Prescription model for medications prescribed during appointments
 model Prescription {
   id            Int         @id @default(autoincrement())
-  appointment   Appointment @relation(fields: [appointmentId], references: [id])
-  appointmentId Int
-  medication    String
-  dosage        String
-  instructions  String?
+  pet           Pet         @relation(fields: [petId], references: [id])
+  petId         Int
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  appointmentId Int?
+  veterinarian  Veterinarian @relation(fields: [veterinarianId], references: [id])
+  veterinarianId Int
+  medication    Json[]
+  status        String      @default("active") // active, completed, cancelled
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([petId])
+  @@index([userId])
+  @@index([appointmentId])
+  @@index([veterinarianId])
 }
 
 // Inventory model for tracking medications and supplies in the clinic
@@ -179,6 +206,28 @@ model Inventory {
   expirationDate DateTime
   reorderLevel   Int      // Minimum quantity before reordering is necessary
 }
+model RehomingPet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  age       String
+  gender    String
+  breed     String
+  type      String   // New field for pet type (dog, cat, etc.)
+  imageUrl  String
+  sellerName String
+  sellerPhone String
+  sellerEmail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-
-
+model Announcement {
+  id          String      @id @default(cuid())
+  title       String
+  content     String      @db.Text
+  startDate   DateTime
+  endDate     DateTime
+  status      String      @default("active")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}

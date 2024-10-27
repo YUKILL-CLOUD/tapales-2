@@ -1,21 +1,10 @@
 import { Suspense } from 'react';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { role } from '@/lib/utils';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { VaccinationForm } from '@/components/forms/VaccinationForm';
 
 export default async function VaccinationPage() {
-    const { userId } = auth();
-    
-    if (!userId) {
-        return redirect('/sign-in');
-    }
 
-    if (role !== 'admin') {
-        return <div>Access denied. Admin privileges required.</div>
-    }
 
     // Fetch all pets for admin
     const pets = await prisma.pet.findMany({

@@ -1,6 +1,7 @@
 "use client";
 
 import { deletePet } from "@/lib/action";
+import { Pencil } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -17,26 +18,17 @@ const FormModal = ({
   data,
   id,
   onSubmitSuccess,
+  trigger,
 }: {
   table:
     | "pet"
-    | "student"
-    | "parent"
-    | "subject"
-    | "class"
-    | "lesson"
-    | "exam"
-    | "assignment"
-    | "result"
-    | "attendance"
-    | "event"
-    | "announcement";
   type: "create" | "update" | "delete";
   data?: any;
   id?: number;
   onSubmitSuccess?: () => void; // New prop type
+  trigger?: React.ReactNode; 
 }) => {
-  const size = type === "create" ? "w-8 h-8" : "w-7 h-7";
+  const size = type === "create" ? "w-8 h-8" : "w-5 h-5";
   const bgColor =
     type === "create"
       ? "bg-lamaYellow"
@@ -87,24 +79,30 @@ const FormModal = ({
 
   return (
     <>
+    {trigger ? (
+      <div onClick={() => setOpen(true)}>{trigger}</div>
+    ) : (
       <button
-        className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
+        className={ `${size} flex items-center justify-center rounded-full ${bgColor}`}
         onClick={() => setOpen(true)}
       >
-        <Image src={`/${type}.png`} alt="" width={16} height={16} />
+        <Pencil className="w-4 h-4 text-green-500 " />
       </button>
-      {open && (
-        <div className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center">
-          <div className="bg-white p-4 rounded-md relative w-[90%] md:w-[70%] lg:w-[60%] xl:w-[50%] 2xl:w-[40%]">
+    )}
+    {open && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-md relative w-full max-w-5xl max-h-[90vh] flex flex-col">
+          <div className="p-4 overflow-y-auto flex-grow">
             <Form />
-            <div
-              className="absolute top-4 right-4 cursor-pointer"
-              onClick={() => setOpen(false)}
-            >
-              <Image src="/close.png" alt="" width={14} height={14} />
-            </div>
           </div>
+          <button
+            className="absolute top-2 right-2 p-1"
+            onClick={() => setOpen(false)}
+          >
+            <Image src="/close.png" alt="Close" width={14} height={14} />
+          </button>
         </div>
+      </div>
       )}
     </>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { VeterinarianForm } from '@/components/forms/VeterinarianForm';
 import VeterinarianProfile from '@/components/VeterinarianProfile';
 import { handleSubmit, getVeterinarianData } from './actions';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Veterinarian } from '@prisma/client';
 
@@ -41,7 +41,7 @@ export default function VeterinarianPage() {
                     <VeterinarianProfile veterinarian={veterinarian} />
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
                     >
                         Edit Information
                     </button>

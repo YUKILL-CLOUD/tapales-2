@@ -1,26 +1,43 @@
 "use client";
 
+import { useState } from 'react';
 import { HealthRecord } from '@prisma/client';
 import { Icon } from "@iconify/react";
 import Link from 'next/link';
-import Pagination from './Pagination';
+import ClientPagination from './ClientPagination';
 import { ITEM_PER_PAGE } from '@/lib/settings';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const truncateText = (text: string, maxLength: number) => {
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 };
 
-export const HealthRecordsTableClient = ({ 
-  healthRecords, 
-  petId,
-  currentPage,
-  totalRecords
-}: { 
-  healthRecords: HealthRecord[]; 
+interface HealthRecordsTableClientProps {
+  initialRecords: HealthRecord[];
+  initialCount: number;
+  initialPage: number;
   petId: number;
-  currentPage: number;
-  totalRecords: number;
-}) => {
+}
+
+export function HealthRecordsTableClient({
+  initialRecords,
+  initialCount,
+  initialPage,
+  petId,
+}: HealthRecordsTableClientProps) {
+  const [records] = useState(initialRecords);
+  const [count] = useState(initialCount);
+  const [page, setPage] = useState(initialPage);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('healthRecordsPage', newPage.toString());
+    router.push(`/list/pets/${petId}?${params.toString()}`);
+    setPage(newPage);
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
@@ -36,7 +53,7 @@ export const HealthRecordsTableClient = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {healthRecords.map((record) => (
+            {initialRecords.map((record) => (
               <tr key={record.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(record.date).toISOString().split('T')[0]}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.weight} kg</td>
@@ -62,7 +79,7 @@ export const HealthRecordsTableClient = ({
           </tbody>
         </table>
       </div>
-      <Pagination page={currentPage} count={totalRecords} />
+      <ClientPagination page={page} count={count} onPageChange={handlePageChange} />
     </>
   );
 };

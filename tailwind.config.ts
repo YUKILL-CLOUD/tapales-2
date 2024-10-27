@@ -15,17 +15,21 @@ const config: Config = {
   		},
   		colors: {
   			mainColor: {
-  				default: 'rgba(94, 84, 142)',
+				50: '#f5f3f9',
+				100: '#e9e6f3',
+				200: '#d4cfe7',
+				300: '#b8afd6',
+				400: '#9a8bc2',
+				500: '#8269af',
+				600: '#6e559a',
+				700: '#5e548e',  // This is your default color
+				800: '#4e4574',
+				900: '#423c60',
+				950: '#2a2639',
   				light: 'rgba(196, 190, 225, 0.8)'
   			},
   			mainHover: 'rgba(159, 134, 192)',
   			textrHover: 'rgb(190, 149, 196)',
-  			lamaSky: '#C3EBFA',
-  			lamaSkyLight: '#EDF9FD',
-  			lamaPurple: '#CFCEFF',
-  			lamaPurpleLight: '#F1F0FF',
-  			lamaYellow: '#FAE27C',
-  			lamaYellowLight: '#FEFCE8',
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

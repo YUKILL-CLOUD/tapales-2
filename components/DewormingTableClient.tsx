@@ -1,26 +1,42 @@
 "use client";
 
+import { useState } from 'react';
 import { Deworming } from '@prisma/client';
 import { Icon } from "@iconify/react";
 import Link from 'next/link';
-import Pagination from './Pagination';
-import { ITEM_PER_PAGE } from '@/lib/settings';
+import ClientPagination from './ClientPagination';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const truncateText = (text: string, maxLength: number) => {
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 };
 
-export const DewormingsTableClient = ({ 
-  deworming, 
-  petId,
-  currentPage,
-  totalRecords
-}: { 
-  deworming: Deworming[]; 
+interface DewormingsTableClientProps {
+  initialDewormings: Deworming[];
+  initialCount: number;
+  initialPage: number;
   petId: number;
-  currentPage: number;
-  totalRecords: number;
-}) => {
+}
+
+export function DewormingsTableClient({
+  initialDewormings,
+  initialCount,
+  initialPage,
+  petId,
+}: DewormingsTableClientProps) {
+  const [dewormings] = useState(initialDewormings);
+  const [count] = useState(initialCount);
+  const [page, setPage] = useState(initialPage);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('dewormingsPage', newPage.toString());
+    router.push(`/list/pets/${petId}?${params.toString()}`);
+    setPage(newPage);
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
@@ -37,7 +53,7 @@ export const DewormingsTableClient = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {deworming.map((deworming) => (
+            {dewormings.map((deworming) => (
               <tr key={deworming.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(deworming.date).toISOString().split('T')[0]}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{truncateText(deworming.dewormingName, 20)}</td>
@@ -66,7 +82,7 @@ export const DewormingsTableClient = ({
           </tbody>
         </table>
       </div>
-      <Pagination page={currentPage} count={totalRecords} />
+      <ClientPagination page={page} count={count} onPageChange={handlePageChange} />
     </>
   );
-};
+}

@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { role } from "@/lib/utils";
@@ -9,6 +9,21 @@ export default async function DewormingRecordPage({
 }: {
   params: { id: string; recordId: string };
 }) {
+  const { userId } = auth();
+  
+  if (!userId) {
+    redirect('/sign-in'); 
+  }
+
+  // Get user role from database
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+    select: { role: true, id: true }
+  });
+
+  if (!user) {
+    redirect('/sign-in');
+  }
   const petId = parseInt(id);
   const dewormingId = parseInt(recordId);
 

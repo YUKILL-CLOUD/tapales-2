@@ -4,13 +4,13 @@ import TableSearch from "@/components/TableSearch";
 import { Appointment, HealthRecord, Pet, Prisma, User } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import Pagination from "@/components/Pagination";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import prisma from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { role } from "@/lib/utils";
-// import { CldImage } from 'next-cloudinary';
-
+import { Button } from "@/components/ui/button";
+import { Eye, Pencil, Plus } from "lucide-react"; 
+import PaginationWrapper from "./PaginationWrapper";
+import { redirect } from "next/navigation";
 type PetList = Pet & {Appointments:Appointment[]} & {healthRecords:HealthRecord[]} & {user:User}
 
 const columns = [
@@ -89,82 +89,56 @@ const renderRow = (item: PetList) => (
       <td>
         <div className="flex items-center gap-2">
           <Link href={`/list/pets/${item.id}`}>
-            <button className="w-7 h-7 flex items-center justify-center rounded-full bg-lamaSky">
-              <Image src="/view.png" alt="" width={16} height={16} />
-            </button>
+          <Button variant="ghost" size="sm">
+            <Eye className="w-5 h-5 text-blue-500" />
+          </Button>
           </Link>
-          {(role === "admin" || role === "user") &&(
-            <FormModal table="pet" type="update" data={item}/>
-          )}
+            <FormModal table="pet" type="update" data={item} trigger={
+              <Button variant="ghost" size="sm">
+                <Pencil className="w-5 h-5 text-green-500" />
+              </Button>
+            }
+          />
         </div>
       </td>
     </tr>
   );
 const PetListPage = async ({
   searchParams,
-}:{
-  searchParams:{ [key:string]: string  | undefined;}
+}: {
+  searchParams: { [key: string]: string | undefined };
 }) => {
-  const { page, ...queryParams } = searchParams || {};
-  const p = page ? parseInt(page) : 1;
+  const { userId } = auth();
+  
+  if (!userId) {
+    return redirect('/sign-in');
+  }
 
-  // Get the current user's information
-  const { userId: clerkUserId } = auth();
-  const user = await currentUser();
-  const userRole = user?.publicMetadata?.role as string | undefined;
-
-  // Get the database user
   const dbUser = await prisma.user.findUnique({
-    where: { clerkUserId: clerkUserId || "" },
+    where: { clerkUserId: userId },
   });
 
-  // console.log("User Role:", userRole);
-  // console.log("Clerk User ID:", clerkUserId);
+  if (!dbUser) {
+    return redirect('/sign-up');
+  }
 
-  // Fetch all pets (temporarily remove the filter)
-  const allPets = await prisma.pet.findMany({
-    include: {
-      user: true,
-    },
-  });
+  const { page, ...queryParams } = searchParams || {};
+  const p = page ? parseInt(page as string) : 1;
 
-  console.log("All pets in the database:", allPets.map(pet => ({ id: pet.id, name: pet.name, userId: pet.userId })));
-
-  // Base query
   let query: Prisma.PetWhereInput = {};
   
-  if (userRole !== "admin" && dbUser) {
-    // For non-admin users, always include their own pets
+  if (dbUser.role !== "admin") {
     query.userId = dbUser.id;
   }
 
-  if (queryParams) {
-    for (const [key, value] of Object.entries(queryParams)) {
-      if (value !== undefined) {
-        switch (key) {
-          case "user":
-            if (userRole === "admin") {
-              // For admin, directly set the userId filter
-              query.userId = value;
-            }
-            // For non-admin users, we keep the existing userId filter
-            break;
-          case "search":
-            query.OR = [
-              { name: { contains: value, mode: 'insensitive' } },
-              { breed: { contains: value, mode: 'insensitive' } },
-              { type: { contains: value, mode: 'insensitive' } }, 
-              { sex: { contains: value, mode: 'insensitive' } }, 
-            ];
-            break;
-          // Add other cases as needed
-        }
-      }
-    }
+  if (queryParams.search) {
+    query.OR = [
+      { name: { contains: queryParams.search, mode: 'insensitive' } },
+      { breed: { contains: queryParams.search, mode: 'insensitive' } },
+      { type: { contains: queryParams.search, mode: 'insensitive' } },
+      { sex: { contains: queryParams.search, mode: 'insensitive' } },
+    ];
   }
-  
-  console.log("Query:", JSON.stringify(query, null, 2)); // For debugging
-  console.log("User ID:", clerkUserId); // Log the user ID
 
   const [data, count] = await prisma.$transaction([
     prisma.pet.findMany({
@@ -180,14 +154,12 @@ const PetListPage = async ({
     prisma.pet.count({ where: query }),
   ]);
 
-  console.log("Fetched pets:", data.map(pet => ({ id: pet.id, name: pet.name, userId: pet.userId }))); // For debugging
-
   return ( 
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">
-          {userRole === "admin" ? "All Pets" : "My Pets"}
+          {dbUser.role === "admin" ? "All Pets" : "My Pets"}
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
@@ -198,8 +170,16 @@ const PetListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-lamaYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {(userRole === "user" || userRole === "admin") && (
-              <FormModal table="pet" type="create"/>
+            {(dbUser.role === "user" || dbUser.role === "admin") && (
+              <FormModal
+                table="pet"
+                type="create"
+                trigger={
+                  <Button variant="default" size="sm">
+                    <Plus className="mr-2 h-4 w-4" /> Add a Pet
+                  </Button>
+                }
+              />
             )}
           </div>
         </div>
@@ -207,7 +187,7 @@ const PetListPage = async ({
       {/* LIST */}
       <Table columns={columns} renderRow={renderRow} data={data} />
       {/* PAGINATION */}
-      <Pagination page={p} count={count} />
+      <PaginationWrapper page={p} count={count} />
     </div>
   );
 };

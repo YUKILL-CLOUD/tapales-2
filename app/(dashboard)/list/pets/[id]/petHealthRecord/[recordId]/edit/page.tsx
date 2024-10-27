@@ -2,6 +2,19 @@ import prisma from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { HealthRecordForm } from "@/components/forms/HealthRecordForm";
+import Link from "next/link";
+
+function formatDateTime(date: Date) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).format(date);
+}
 
 export default async function EditHealthRecordPage({
   params: { id, recordId },
@@ -67,6 +80,11 @@ export default async function EditHealthRecordPage({
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Edit Health Record for {pet.name}</h1>
+      <Link href={`/list/pets/${petId}/petHealthRecord/${recordId}`}>
+          <button className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+            Go Back
+          </button>
+      </Link>
       <HealthRecordForm
         pets={[pet]}
         preSelectedPetId={pet.id}
@@ -75,7 +93,7 @@ export default async function EditHealthRecordPage({
       />
       {healthRecord.updatedAt && (
         <p className="mt-4 text-sm text-gray-500">
-          Last updated: {new Date(healthRecord.updatedAt).toLocaleString()}
+          Last updated: {formatDateTime(healthRecord.updatedAt)}
         </p>
       )}
     </div>

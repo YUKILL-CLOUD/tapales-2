@@ -7,7 +7,7 @@ import InputField from "../InputField";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Deworming,  } from "@prisma/client";
+import { Deworming  } from "@prisma/client";
 
 const dewormingSchema = z.object({
   petId: z.string().min(1, "Pet selection is required"),
@@ -151,7 +151,7 @@ export function DewormingForm({ pets, veterinarians, preSelectedPetId, initialDa
             value={searchTerm}
             onChange={handleSearchChange}
             onFocus={() => setShowSuggestions(true)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             placeholder="Type to search for a pet..."
           />
           {showSuggestions && (
@@ -225,20 +225,14 @@ export function DewormingForm({ pets, veterinarians, preSelectedPetId, initialDa
       />
 
       <div>
-        <label htmlFor="veterinarianId" className="block text-sm font-medium text-gray-700">Veterinarian</label>
-        <select
-          id="veterinarianId"
-          {...register("veterinarianId")}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-        >
-          <option value="">Select a veterinarian</option>
-          {veterinarians.map((vet) => (
-            <option key={vet.id} value={vet.id.toString()}>{vet.name}</option>
-          ))}
-        </select>
-        {errors.veterinarianId && <p className="mt-1 text-sm text-red-600">{errors.veterinarianId.message}</p>}
+        <p className="text-md font-medium text-gray-700">Veterinarian: {veterinarians[0]?.name || "Not assigned"}</p>
+          <input
+            type="hidden"
+            id="veterinarianId"
+            {...register("veterinarianId")}
+            value={veterinarians[0]?.id.toString() || ""}
+          />
       </div>
-
       <button
         type="submit"
         disabled={isSubmitting || (!preSelectedPetId && !selectedPet)}

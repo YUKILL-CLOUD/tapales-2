@@ -1,26 +1,42 @@
 "use client";
-
+import { useState } from 'react';
 import { Vaccination } from '@prisma/client';
 import { Icon } from "@iconify/react";
 import Link from 'next/link';
-import Pagination from './Pagination';
+import ClientPagination from './ClientPagination';
 import { ITEM_PER_PAGE } from '@/lib/settings';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const truncateText = (text: string, maxLength: number) => {
   return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 };
 
-export const VaccinationsTableClient = ({ 
-  vaccinations, 
-  petId,
-  currentPage,
-  totalRecords
-}: { 
-  vaccinations: Vaccination[]; 
+interface VaccinationsTableClientProps {
+  initialVaccinations: Vaccination[];
+  initialCount: number;
+  initialPage: number;
   petId: number;
-  currentPage: number;
-  totalRecords: number;
-}) => {
+}
+
+export function VaccinationsTableClient({
+  initialVaccinations,
+  initialCount,
+  initialPage,
+  petId,
+}: VaccinationsTableClientProps) {
+  const [vaccinations] = useState(initialVaccinations);
+  const [count] = useState(initialCount);
+  const [page, setPage] = useState(initialPage);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams?.toString() || '');
+    params.set('vaccinationsPage', newPage.toString());
+    router.push(`/list/pets/${petId}?${params.toString()}`);
+    setPage(newPage);
+  };
+
   return (
     <>
       <div className="overflow-x-auto">
@@ -66,7 +82,7 @@ export const VaccinationsTableClient = ({
           </tbody>
         </table>
       </div>
-      <Pagination page={currentPage} count={totalRecords} />
+      <ClientPagination page={page} count={count} onPageChange={handlePageChange} />
     </>
   );
-};
+}

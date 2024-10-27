@@ -1,23 +1,9 @@
 import { Suspense } from 'react';
 import { HealthRecordForm } from '@/components/forms/HealthRecordForm';
-import { getPets } from '@/lib/petActions';
-import { auth, currentUser } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { role } from '@/lib/utils';
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 export default async function HealthRecordPage() {
-    const { userId } = auth();
-    
-    if (!userId) {
-        return redirect('/sign-in');
-    }
-
-    if (role !== 'admin') {
-        return <div>Access denied. Admin privileges required.</div>
-    }
-
     // Fetch all pets for admin
     const pets = await prisma.pet.findMany({
         select: {
