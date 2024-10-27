@@ -6,6 +6,7 @@ RUN npm install
 
 COPY . .
 RUN npx prisma generate
+RUN npm run build
 
 # Add a script to handle startup
 COPY docker-entrypoint.sh /usr/local/bin/

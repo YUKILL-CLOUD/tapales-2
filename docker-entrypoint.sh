@@ -8,6 +8,6 @@ sleep 5
 echo "Running migrations..."
 npx prisma migrate deploy
 
-# Start the application
-echo "Starting the application..."
+# Start the production server
+echo "Starting the production server..."
 npm run start
