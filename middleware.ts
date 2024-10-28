@@ -7,33 +7,25 @@ const matchers = Object.keys(routeAccessMap).map(route => ({
   matcher: createRouteMatcher([route]),
   allowedRoles: routeAccessMap[route],
 }));
+const publicRoutes = ['/', '/sign-up'];
 
 export default clerkMiddleware((auth, req) => {
-  const { sessionClaims } = auth();
+  const { sessionClaims, userId } = auth();
+  const isPublicRoute = publicRoutes.includes(new URL(req.url).pathname);
 
-  // If there's no session, allow the request to proceed
-  if (!sessionClaims) {
+  if (new URL(req.url).pathname === '/redirect' || isPublicRoute) {
     return NextResponse.next();
   }
-
+  // Check if the user is signing up or being redirected
+  if (!userId) {
+    return NextResponse.redirect(new URL('/sign-in', req.url));
+  }
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-  // Check if the user is signing up or being redirected
-  if (!sessionClaims && (req.url.includes('/sign-up') || req.url.includes('/redirect'))) {
-    return NextResponse.next(); // Skip middleware checks for these routes
-  }
-
   // If the user has no role, redirect to the redirect page
-  if (!role) {
+if (!role && !new URL(req.url).pathname.includes('/redirect')) {
     return NextResponse.redirect(new URL('/redirect', req.url));
   }
-
-  // Check if the user's role is allowed for the requested route
-  for (const { matcher, allowedRoles } of matchers) {
-    if (matcher(req) && !allowedRoles.includes(role)) {
-      return NextResponse.redirect(new URL(`/${role}`, req.url))
-    }
-}
 
  return NextResponse.next(); // Proceed if all checks pass
 })

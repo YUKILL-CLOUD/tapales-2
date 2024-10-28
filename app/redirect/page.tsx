@@ -66,9 +66,10 @@ export default function RedirectPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || isProcessing) return;
 
     if (!user) {
       router.push('/sign-in');
@@ -76,7 +77,14 @@ export default function RedirectPage() {
     }
 
     const initializeUser = async () => {
+      setIsProcessing(true);
       try {
+
+        if (user.publicMetadata?.role) {
+          router.push(`/${user.publicMetadata.role}`);
+          return;
+        }
+
         setStep(1);
         await createUserAfterSignUp();
         
@@ -85,6 +93,7 @@ export default function RedirectPage() {
         if (!success) throw new Error(error || 'Failed to update user role');
         
         setStep(3);
+        await user.reload();
         const role = user.publicMetadata.role as string;
         if (role) {
           router.push(`/${role}`);
@@ -93,11 +102,13 @@ export default function RedirectPage() {
         }
       } catch (error) {
         setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      }finally {
+        setIsProcessing(false);
       }
     };
 
     initializeUser();
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user, router, isProcessing]);
 
   if (error) {
     return (
