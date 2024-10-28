@@ -254,6 +254,18 @@ export default function SignInPage() {
                 />
                 <Clerk.FieldError className="mt-1 text-xs text-red-600" />
               </Clerk.Field>
+              <Clerk.Field name="password">
+                <Clerk.Label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </Clerk.Label>
+                <Clerk.Input
+                  type="password"
+                  required
+                  placeholder="Enter your password"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainColor-500 focus:border-transparent"
+                />
+                <Clerk.FieldError className="mt-1 text-xs text-red-600" />
+              </Clerk.Field>
 
               <SignIn.Action
                 submit
@@ -263,33 +275,7 @@ export default function SignInPage() {
               </SignIn.Action>
             </div>
 
-            <SignIn.Step
-            name="verifications"
-            className="bg-white rounded-lg shadow-md p-8 space-y-6"
-          >
-            <header className="text-center">
-              <h1 className="mt-4 text-xl font-medium tracking-tight text-grey-500">
-                Verify email code
-              </h1>
-            </header>
-            <Clerk.GlobalError className="block text-sm text-red-400" />
-            <SignIn.Strategy name="email_code">
-              <Clerk.Field name="code" className="space-y-2">
-                <Clerk.Label className="text-sm font-medium text-gray-500">Email code</Clerk.Label>
-                <Clerk.Input
-                  required
-                  className="w-full rounded-md bg-mainColor-light px-3.5 py-2 text-sm text-gray-500 outline-none ring-1 ring-inset ring-zinc-700 hover:ring-zinc-600 focus:bg-transparent focus:ring-[1.5px] focus:ring-blue-400 data-[invalid]:ring-red-400"
-                />
-                <Clerk.FieldError className="block text-sm text-red-400" />
-              </Clerk.Field>
-              <SignIn.Action
-                submit
-                className="relative isolate w-full rounded-md bg-mainColor-500 px-3.5 py-1.5 text-center text-sm font-medium text-white shadow-[0_1px_0_0_theme(colors.white/10%)_inset,0_0_0_1px_theme(colors.white/5%)] outline-none before:absolute before:inset-0 before:-z-10 before:rounded-md before:bg-white/5 before:opacity-0 hover:before:opacity-100 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-blue-400 active:text-white/70 active:before:bg-black/10"
-              >
-                Continue
-              </SignIn.Action>
-            </SignIn.Strategy>
-            </SignIn.Step>
+            
             {/* <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
