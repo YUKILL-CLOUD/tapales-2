@@ -201,18 +201,35 @@ import * as SignIn from '@clerk/elements/sign-in'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { currentUser } from '@clerk/nextjs/server';
 
 export default function SignInPage() {
-  const {isLoaded, isSignedIn, user } = useUser()
-  const router = useRouter();
-  
+  const { isLoaded, isSignedIn, user } = useUser()
+  const router = useRouter()
+
   useEffect(() => {
-    const role = user?.publicMetadata.role;
-    if (role){
-      router.push(`/${role}`)
+    if (isLoaded) {
+      // If user is signed in, check for role and redirect
+      if (isSignedIn && user) {
+        const role = user.publicMetadata.role;
+        if (role) {
+          router.push(`/${role}`);
+        }
+      } else {
+        // If user is not authenticated and has no existing session
+        const hasExistingSession = localStorage.getItem('clerk-db-jwt');
+        if (!hasExistingSession) {
+          router.push('/sign-up');
+        }
+      }
     }
-  },[user,router ])
-  
+  }, [isLoaded, isSignedIn, user, router]);
+
+  // Show loading state while checking auth
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md p-6">

@@ -1,7 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 import { routeAccessMap } from './lib/settings'
 import { NextResponse } from 'next/server';
-import prisma from './lib/prisma';
 
 
 const matchers = Object.keys(routeAccessMap).map(route=>({
