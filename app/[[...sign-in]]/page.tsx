@@ -224,7 +224,6 @@ export default function SignInPage() {
     }
   }, [isLoaded, isSignedIn, user, router]);
 
-  // Show loading state while checking auth
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
