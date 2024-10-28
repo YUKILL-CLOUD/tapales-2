@@ -1,36 +1,37 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
-import { routeAccessMap } from './lib/settings'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { routeAccessMap } from './lib/settings';
 import { NextResponse } from 'next/server';
 
-
-const matchers = Object.keys(routeAccessMap).map(route=>({
-    matcher: createRouteMatcher([route]),
-    allowedRoles: routeAccessMap[route],
-    }));
+// Create matchers for routes and their allowed roles
+const matchers = Object.keys(routeAccessMap).map(route => ({
+  matcher: createRouteMatcher([route]),
+  allowedRoles: routeAccessMap[route],
+}));
 
 export default clerkMiddleware((auth, req) => {
-//   if (isProtectedRoute(req)) auth().protect()
-const {sessionClaims } = auth();
+  const { sessionClaims } = auth();
 
-if (!sessionClaims) {
+  // If there's no session, allow the request to proceed
+  if (!sessionClaims) {
     return NextResponse.next();
   }
 
+  const role = (sessionClaims?.metadata as { role?: string })?.role;
 
-const role = (sessionClaims?.metadata as {role?: string })?.role;
-
-// Check if the user is signing up, in which case bypass role checking
-if (!sessionClaims && req.url.includes('/sign-up')|| req.url.includes('/redirect')){
-    return NextResponse.next(); // Skip middleware checks for the sign-up route
+  // Check if the user is signing up or being redirected
+  if (!sessionClaims && (req.url.includes('/sign-up') || req.url.includes('/redirect'))) {
+    return NextResponse.next(); // Skip middleware checks for these routes
   }
 
-if (!role) {
+  // If the user has no role, redirect to the redirect page
+  if (!role) {
     return NextResponse.redirect(new URL('/redirect', req.url));
   }
 
-for (const {matcher, allowedRoles }of matchers){
-    if (matcher(req)&& !allowedRoles.includes(role!)){
-        return NextResponse.redirect(new URL(`/${role}`, req.url))
+  // Check if the user's role is allowed for the requested route
+  for (const { matcher, allowedRoles } of matchers) {
+    if (matcher(req) && !allowedRoles.includes(role)) {
+      return NextResponse.redirect(new URL(`/${role}`, req.url))
     }
 }
 

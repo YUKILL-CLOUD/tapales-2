@@ -53,19 +53,17 @@
 "use client"
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { updateUserRole } from "@/lib/userUtils";
 import { createUserAfterSignUp } from '@/lib/users';
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import loading from './../(dashboard)/list/loading';
 
 export default function RedirectPage() {
+  const { isLoaded, user } = useUser();
   const router = useRouter();
-  const { user, isLoaded } = useUser();
-  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,25 +77,22 @@ export default function RedirectPage() {
 
     const initializeUser = async () => {
       try {
-        // Step 1: Create user in database
         setStep(1);
         await createUserAfterSignUp();
         
-        // Step 2: Update user role
         setStep(2);
-        await updateUserRole();
+        const { success, error } = await updateUserRole();
+        if (!success) throw new Error(error || 'Failed to update user role');
         
-        // Step 3: Redirect based on role
         setStep(3);
-        router.push('/user');
-        toast.success('Account setup completed successfully!');
+        const role = user.publicMetadata.role as string;
+        if (role) {
+          router.push(`/${role}`);
+        } else {
+          throw new Error('Role not set after initialization');
+        }
       } catch (error) {
-        console.error('Error during user initialization:', error);
-        setError('An unexpected error occurred. Please try again.');
-        toast.error('An unexpected error occurred. Please try again.');
-        router.push('/');
-      } finally {
-        setLoading(false);
+        setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       }
     };
 

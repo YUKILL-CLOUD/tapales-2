@@ -207,19 +207,12 @@ export default function SignInPage() {
   const router = useRouter()
 
   useEffect(() => {
-    if (isLoaded) {
-      // If user is signed in, check for role and redirect
-      if (isSignedIn && user) {
-        const role = user.publicMetadata.role;
-        if (role) {
-          router.push(`/${role}`);
-        }
+    if (isLoaded && isSignedIn && user) {
+      const role = user.publicMetadata.role;
+      if (role) {
+        router.push(`/${role}`);
       } else {
-        // If user is not authenticated and has no existing session
-        const hasExistingSession = localStorage.getItem('clerk-db-jwt');
-        if (!hasExistingSession) {
-          router.push('/sign-up');
-        }
+        router.push('/redirect');
       }
     }
   }, [isLoaded, isSignedIn, user, router]);
