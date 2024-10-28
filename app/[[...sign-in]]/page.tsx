@@ -201,7 +201,6 @@ import * as SignIn from '@clerk/elements/sign-in'
 import { useUser } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { currentUser } from '@clerk/nextjs/server';
 
 export default function SignInPage() {
   const { isLoaded, isSignedIn, user } = useUser()
