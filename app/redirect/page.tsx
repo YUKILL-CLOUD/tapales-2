@@ -61,21 +61,33 @@ import { createUserAfterSignUp } from '@/lib/users';
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY = 2000; // 2 seconds
+
 export default function RedirectPage() {
   const { isLoaded, user } = useUser();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+
 
   useEffect(() => {
+    
+    let timeoutId: NodeJS.Timeout;
+
     if (!isLoaded || isProcessing) return;
 
     if (!user) {
       router.push('/sign-in');
       return;
     }
-
+  // Prevent further attempts if max is reached
+  if (attempts >= MAX_ATTEMPTS) {
+    setError('Maximum attempts reached. Please contact support.');
+    return;
+  }
     const initializeUser = async () => {
       setIsProcessing(true);
       try {
@@ -95,20 +107,39 @@ export default function RedirectPage() {
         setStep(3);
         await user.reload();
         const role = user.publicMetadata.role as string;
+        
         if (role) {
           router.push(`/${role}`);
+          toast.success('Account setup completed successfully!');
         } else {
+             // Instead of immediate retry, schedule next attempt
+          setAttempts(prev => prev + 1);
+          if (attempts + 1 < MAX_ATTEMPTS) {
+            timeoutId = setTimeout(() => {
+              setIsProcessing(false); // Allow next attempt after delay
+            }, RETRY_DELAY);
+          }
           throw new Error('Role not set after initialization');
         }
       } catch (error) {
-        setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+        setAttempts(prev => prev + 1);
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+        setError(attempts + 1 >= MAX_ATTEMPTS 
+          ? `${errorMessage}. Maximum attempts reached. Please contact support.`
+          : errorMessage
+        );
+        toast.error(errorMessage);
       }finally {
         setIsProcessing(false);
       }
     };
 
     initializeUser();
-  }, [isLoaded, user, router, isProcessing]);
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLoaded, user, router, isProcessing, attempts]);
 
   if (error) {
     return (

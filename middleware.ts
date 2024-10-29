@@ -18,14 +18,24 @@ export default clerkMiddleware((auth, req) => {
   }
   // Check if the user is signing up or being redirected
   if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', req.url));
+    return NextResponse.redirect(new URL('/', req.url));
   }
   const role = (sessionClaims?.metadata as { role?: string })?.role;
 
+
   // If the user has no role, redirect to the redirect page
-if (!role && !new URL(req.url).pathname.includes('/redirect')) {
+  if (userId && !role ) {
     return NextResponse.redirect(new URL('/redirect', req.url));
   }
+
+   // Check if the user's role is allowed for the requested route
+   if(role){
+   for (const { matcher, allowedRoles } of matchers) {
+    if (matcher(req) && !allowedRoles.includes(role!)) {
+      return NextResponse.redirect(new URL(`/${role}`, req.url));
+    }
+  }
+}
 
  return NextResponse.next(); // Proceed if all checks pass
 })

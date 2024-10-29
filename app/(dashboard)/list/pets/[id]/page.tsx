@@ -211,14 +211,14 @@ const SinglePetPage = async ({ params, searchParams }: { params: { id: string },
            
 
             <Link 
-              href={`/vaccination`} 
+              href={`/list/vaccination`} 
               className="p-2 bg-mainColor-100 text-mainColor-800 rounded-md text-sm flex items-center hover:bg-mainColor-300 transition-colors"
             >
               <Icon icon="mdi:needle" className="mr-2 w-5 h-5" />
               Add Vaccination
             </Link>
             <Link 
-              href={`/deworming`} 
+              href={`/list/deworming`} 
               className="p-2 bg-mainColor-200 text-mainColor-800 rounded-md text-sm flex items-center hover:bg-mainColor-300 transition-colors"
             >
               <Icon icon="mdi:pill" className="mr-2 w-5 h-5" />
